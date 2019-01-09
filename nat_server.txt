@@ -1,0 +1,42 @@
+HOW TO INSTALL AND CONFIGURE NAT SERVER ON LINUX USING IPTABLES
+---------------------------------------------------------------
+step1: install two network interfaces with different ip domains
+and make sure they both should be active and should show in route -n
+step2: determine the interface name for setup the internal and external
+network(eg 192.168.46.226 for external(for connecting the internet)
+and 10.0.3.15 for internal network) 
+step3: now make the ip static on both the network card and enable the 
+	ip forwarding
+	TO CHECK IP FORWARDING	
+	--	sysctl -a | grep ip_forward
+		make the entry in /etc/sysctl.conf as 
+		net.ipv4.ip_forward=1
+step4: configure the network
+	open /etc/sysconfig/network file 
+	and make the entries like
+	NETWORKING=yes
+	HOSTNAME=nat
+	GATEWAY=192.168.43.1	#gateway of external network
+step5: check the dns configuration 
+	open /etc/resolv.conf file and check the name and ip 
+	of nameserver
+ step6: use iptables to setup the nat server by these commands
+	iptables --flush 
+	iptables --table nat --flush
+	iptables --delete-chain
+	iptables --table nat --delete-chain
+	iptables --table nat --append POSTROUTING --out-interface eth0 -j MASQUERADE
+	iptables --append FORWARD --in-interface eth1 -j ACCEPT
+ 	service iptables restart
+step7: to check the nat tables 
+	iptables -t nat -n -L -v
+step7: go to client and make the network as nat and check the ip
+	(ip should be in 10.0._.)
+	check the nameserver in /etc/resolv.conf
+	this should be same as nat server file
+step8: try to ping to gateway of external network i.e. 192.168.43.1
+
+step9: try to ping the google.com
+-------------------------------------------------------------------
+ 
+this is full working process for NAT server.
